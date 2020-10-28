@@ -26,6 +26,8 @@ public class Request {
 
     private final NavigatablePsiElement psiElement;
     @Nullable
+    private String className;
+    @Nullable
     private HttpMethod method;
     @Nullable
     private String path;
@@ -81,6 +83,15 @@ public class Request {
         }
         path = path.replaceAll("//", "/");
         this.path = path;
+    }
+
+    @Nullable
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(@Nullable String className) {
+        this.className = className;
     }
 
     public void setParent(@NotNull Request parent) {
