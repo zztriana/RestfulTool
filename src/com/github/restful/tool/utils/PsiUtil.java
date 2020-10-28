@@ -10,8 +10,10 @@
  */
 package com.github.restful.tool.utils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.intellij.psi.*;
 import com.intellij.psi.impl.source.PsiClassReferenceType;
+import com.intellij.psi.impl.source.tree.java.PsiLiteralExpressionImpl;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -91,6 +93,13 @@ public class PsiUtil {
                 return null;
             }
 
+            // List泛型读取
+            if(List.class.getName().equals(psiClass.getQualifiedName())) {
+                if(type.getParameters().length >  0) {
+                    return Collections.singletonList(getDefaultValueOfPsiType(type.getParameters()[0]));
+                }
+            }
+
             final Object hasResult = getDefaultData(psiClass);
             if (hasResult != null) {
                 return hasResult;
@@ -105,8 +114,20 @@ public class PsiUtil {
                     // 如果该 Getter|Setter 方法所对应的Field为空，则跳过
                     continue;
                 }
+                String fieldName = fieldMethod.getFieldName();
+                //如果包含 JsonProperty 注解则取注解
+                PsiAnnotation annotation = psiField.getAnnotation(JsonProperty.class.getName());
+                if (annotation != null) {
+                    PsiAnnotationMemberValue attrValue = annotation.findDeclaredAttributeValue("value");
+                    if (attrValue instanceof PsiLiteralExpressionImpl) {
+                        Object value = ((PsiLiteralExpressionImpl) attrValue).getValue();
+                        if (value != null) {
+                            fieldName = value.toString();
+                        }
+                    }
+                }
                 result.put(
-                        fieldMethod.getFieldName(),
+                        fieldName,
                         getDefaultValueOfPsiType(psiField.getType())
                 );
             }
