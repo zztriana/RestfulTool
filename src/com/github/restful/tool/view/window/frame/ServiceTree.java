@@ -100,7 +100,7 @@ public class ServiceTree extends JBScrollPane {
                     .collect(Collectors.groupingBy(Request::getClassName, TreeMap::new, Collectors.toList()));
             apiRequests.forEach((apiName, requests) -> {
                 // 如果控制层名称与项目节点相同
-                if (StringUtils.equals(itemName, apiName)) {
+                if (StringUtils.equals(itemName, StringUtils.substring(apiName, apiName.lastIndexOf(".") + 1))) {
                     requests.forEach(request -> {
                         moduleNode.add(new RequestNode(request));
                         apiCount.incrementAndGet();
