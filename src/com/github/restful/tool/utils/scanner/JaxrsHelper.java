@@ -180,6 +180,8 @@ public class JaxrsHelper {
                 childrenRequests.add(request);
             }
         }
+        // 为所有的请求加上当前控制层类名
+        childrenRequests.forEach(request -> request.setClassName(psiClass.getQualifiedName()));
         return childrenRequests;
     }
 

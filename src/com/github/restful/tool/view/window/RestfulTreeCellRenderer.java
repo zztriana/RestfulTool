@@ -13,6 +13,7 @@ package com.github.restful.tool.view.window;
 import com.github.restful.tool.beans.ModuleTree;
 import com.github.restful.tool.beans.Request;
 import com.github.restful.tool.view.window.frame.ServiceTree;
+import com.intellij.icons.AllIcons;
 import com.intellij.ui.ColoredTreeCellRenderer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +42,11 @@ public class RestfulTreeCellRenderer extends ColoredTreeCellRenderer {
             ServiceTree.RequestNode node = (ServiceTree.RequestNode) value;
             Request data = node.getData();
             setMethodTypeAndPath(data, selected);
-        } else if (value instanceof ServiceTree.TreeNode<?>) {
+        } else if (value instanceof ServiceTree.ApiNode) {
+            ServiceTree.ApiNode node = (ServiceTree.ApiNode) value;
+            setIcon(AllIcons.Nodes.Class);
+            append(node.toString());
+        }else if (value instanceof ServiceTree.TreeNode<?>) {
             ServiceTree.TreeNode<?> node = (ServiceTree.TreeNode<?>) value;
             append(node.toString());
         }

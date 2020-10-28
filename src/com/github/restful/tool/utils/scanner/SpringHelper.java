@@ -75,6 +75,8 @@ public class SpringHelper {
                 requests.add(request);
             }));
         }
+        // 为所有的请求加上当前控制层类名
+        requests.forEach(request -> request.setClassName(psiClass.getQualifiedName()));
         return requests;
     }
 

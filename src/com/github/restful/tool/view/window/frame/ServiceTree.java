@@ -30,6 +30,7 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.treeStructure.SimpleTree;
 import com.intellij.ui.treeStructure.Tree;
 import com.intellij.util.ui.JBUI;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,7 +46,9 @@ import java.awt.event.MouseEvent;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author ZhangYuanSheng
@@ -87,14 +90,29 @@ public class ServiceTree extends JBScrollPane {
         AtomicInteger apiCount = new AtomicInteger();
         TreeNode<String> root = new TreeNode<>("Not found any services");
 
-        allRequests.forEach((itemName, requests) -> {
-            if (requests == null || requests.isEmpty()) {
+        allRequests.forEach((itemName, itemRequests) -> {
+            if (itemRequests == null || itemRequests.isEmpty()) {
                 return;
             }
-            ModuleNode moduleNode = new ModuleNode(new ModuleTree(itemName, requests.size()));
-            requests.forEach(request -> {
-                moduleNode.add(new RequestNode(request));
-                apiCount.incrementAndGet();
+            ModuleNode moduleNode = new ModuleNode(new ModuleTree(itemName, itemRequests.size()));
+            // 按控制层分组
+            Map<String, List<Request>> apiRequests = itemRequests.stream()
+                    .collect(Collectors.groupingBy(Request::getClassName, TreeMap::new, Collectors.toList()));
+            apiRequests.forEach((apiName, requests) -> {
+                // 如果控制层名称与项目节点相同
+                if (StringUtils.equals(itemName, apiName)) {
+                    requests.forEach(request -> {
+                        moduleNode.add(new RequestNode(request));
+                        apiCount.incrementAndGet();
+                    });
+                }else {
+                    ApiNode apiNode = new ApiNode(apiName);
+                    requests.forEach(request -> {
+                        apiNode.add(new RequestNode(request));
+                        apiCount.incrementAndGet();
+                    });
+                    moduleNode.add(apiNode);
+                }
             });
             root.add(moduleNode);
         });
@@ -340,6 +358,13 @@ public class ServiceTree extends JBScrollPane {
     public static class ModuleNode extends TreeNode<ModuleTree> {
 
         public ModuleNode(ModuleTree data) {
+            super(data);
+        }
+    }
+
+    public static class ApiNode extends TreeNode<String> {
+
+        public ApiNode(String data) {
             super(data);
         }
     }
